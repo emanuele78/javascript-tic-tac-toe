@@ -14,7 +14,9 @@ body {
 
 .game_container {
 	width: 600px;
-	height: 600px;
+	/*height: 600px;*/
+	/*width: 900px;*/
+	height: 900px;
 	background-color: greenyellow;
 }
 
@@ -25,11 +27,32 @@ body {
 }
 
 .game_cell {
+	position: relative;
 	width: 300px;
 	height: 300px;
 	float: left;
-	line-height: 300px;
-	text-align: center;
 	border: 1px solid black;
+}
+
+.game_cell > i.fa-circle {
 	font-size: 200px;
 }
+
+.game_cell > i.fa-times {
+	font-size: 280px;
+}
+
+.game_cell > i.fa-circle,
+.game_cell > i.fa-times {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.template{
+	display: none;
+}
+
+
+

@@ -1,44 +1,119 @@
 "use strict"
 var ticTac = {
-	currentPlayer: 1,
+	firstPlayerCPU: false,
+	secondPlayerCPU: true,
+	startingPlayer: 1,
 	initializeGame: function () {
-		var tree = [
+		// albero delle combinazioni vuoto
+		var tree1 = [
+			[],
 			[],
 			[],
 			[],
 			[],
 			[]
 		];
-		tree[0].push("0000")
+		var tree2 = [
+			[],
+			[],
+			[],
+			[],
+			[],
+			[]
+		];
+		// var tree1 = [
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[]
+		// ];
+		// var tree2 = [
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[]
+		// ];
+		// situazione iniziale - penso sia il metodo più veloce per avere 2 array di oggetti
+		// anziché creare un metodo che faccia un deep shallow copy di un array template
+		tree1[0].push("00000");
+		tree2[0].push("00000");
+		// tree1[0].push("000000000");
+		// tree2[0].push("000000000");
+		this.currentPlayer = this.startingPlayer;
 		var startingLevel = 0;
-		this.gameTree = tree;
-		this.createGameTree(startingLevel, this.currentPlayer);
-		// this.attachListener();
-		this.createGameTreeValues();
-		// this.searchCurrentGame();
+		// alberi dei giochi per le due mosse iniziali
+		this.gameTreeFirstPlayer = tree1;
+		this.gameTreeSecondPlayer = tree2;
+		this.createGameTree(startingLevel, this.startingPlayer, this.gameTreeFirstPlayer);
+		this.createGameTree(startingLevel, (this.startingPlayer == 1 ? 2 : 1), this.gameTreeSecondPlayer);
+		// alberi dei valori per le due mosse iniziali
+		this.gameTreeValuesFirstPlayer = this.createGameTreeValues(this.gameTreeFirstPlayer, 1);
+		this.gameTreeValuesSecondPlayer = this.createGameTreeValues(this.gameTreeSecondPlayer, 2);
+		console.log(this.gameTreeFirstPlayer);
+		console.log(this.gameTreeValuesFirstPlayer);
+		// TODO da cancellare
+		// for (var r = 0; r < this.gameTreeValuesFirstPlayer.length; r++) {
+		// 	var somma = 0;
+		// 	for (var s = 0; s < this.gameTreeValuesFirstPlayer[r].length; s++) {
+		// 		somma += this.gameTreeValuesFirstPlayer[r][s];
+		// 	}
+		// 	console.log("livello " + r + ":" + somma);
+		// }
+		// TODO per la stampa da cancellare
+		// var container= $(".values");
+		// for(var t =0; t<120;t++){
+		// 	var elementCloned = $(".template .element").clone();
+		// 	elementCloned.find(".game").text(this.gameTreeFirstPlayer[5][t]);
+		// 	elementCloned.find(".value").text(this.gameTreeValuesFirstPlayer[5][t]);
+		// 	container.append(elementCloned);
+		// }
 		this.playGame();
 	},
-	createGameTree: function (level, currentPlayer) {
-		for (var cont = 0; cont < this.gameTree[level].length; cont++) {
-			for (var i = 0; i < 4; i++) {
-				if (this.gameTree[level][cont][i] == 0) {
-					var before = this.gameTree[level][cont].substr(0, i);
-					var after = this.gameTree[level][cont].substr(i + 1);
-					this.gameTree[level + 1].push(before + currentPlayer + after);
+	// metodo che crea albero di gioco per tutte le possibili mosse
+	// in base al giocatore che muove e al livello di partenza
+	createGameTree: function (level, currentPlayer, currentGameTree) {
+		for (var cont = 0; cont < currentGameTree[level].length; cont++) {
+			for (var i = 0; i < currentGameTree.length - 1; i++) {
+				if (currentGameTree[level][cont][i] == 0) {
+					var before = currentGameTree[level][cont].substr(0, i);
+					var after = currentGameTree[level][cont].substr(i + 1);
+					currentGameTree[level + 1].push(before + currentPlayer + after);
 				}
 			}
 		}
-		if (level++ < 3) {
+		if (level++ < currentGameTree.length - 2) {
 			currentPlayer = (currentPlayer == 1 ? 2 : 1);
-			this.createGameTree(level, currentPlayer);
+			this.createGameTree(level, currentPlayer, currentGameTree);
 		}
 	},
+	// metodo che collega il listener per il click dell'utente nella scacchiera
 	attachListener: function () {
 		var thisObject = this;
 		$(".game_container .game_cell").click(function () {
 			thisObject.userMove.call(thisObject, $(this));
 		});
 	},
+	//metodo che ritorna un nuovo oggetto game dai valori passati
+	getGameObject: function (game, level) {
+		var game = {
+			level: level,
+			game: game
+		};
+		return game;
+	},
+	// metodo che ritorna lo stato corrente della scacchiera nella forma 00010200
 	getCurrentGameStatus: function () {
 		var gameStatus = "";
 		$(".game_container .game_cell").each(function () {
@@ -53,10 +128,11 @@ var ticTac = {
 				gameStatus = gameStatus.concat("0")
 			}
 		});
-		console.log(gameStatus);
 		return gameStatus;
 	},
-	searchCurrentGame: function () {
+	// metodo che ritorna un oggetto coordinate gioco nella forma sotto livello albero e n. gioco dallo
+	// stato corrente della scacchiera
+	searchCurrentGame: function (gameTree) {
 		var continueSearchInsideTree = true;
 		var continueSearchGame = true;
 		var currentGame = this.getCurrentGameStatus();
@@ -64,12 +140,12 @@ var ticTac = {
 		while (continueSearchInsideTree) {
 			var game = 0;
 			while (continueSearchGame) {
-				if (this.gameTree[level][game] == currentGame) {
+				if (gameTree[level][game] == currentGame) {
 					continueSearchGame = false;
 					continueSearchInsideTree = false;
 				} else {
 					game++;
-					if (game == this.gameTree[level].length) {
+					if (game == gameTree[level].length) {
 						continueSearchGame = false;
 					}
 				}
@@ -80,31 +156,39 @@ var ticTac = {
 				continueSearchGame = true;
 			}
 		}
-		console.log("level: " + level + " game: " + game);
-		var game = {
-			level: level,
-			game: game
-		};
-		return game;
+		return this.getGameObject(game, level)
 	},
-	createGameTreeValues: function () {
+	createGameTreeValues: function (gameTree, player) {
+		// var treeValues = [
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[]
+		// ];
 		var treeValues = [
+			[],
 			[],
 			[],
 			[],
 			[],
 			[]
 		];
-		var finalScoreStatus = this.gameTree[this.gameTree.length - 1];
+		var finalScoreStatus = gameTree[gameTree.length - 1];
 		for (var i = 0; i < finalScoreStatus.length; i++) {
-			treeValues[treeValues.length - 1].push(this.getFinalScore(finalScoreStatus[i]));
-			treeValues[treeValues.length - 2].push(this.getFinalScore(finalScoreStatus[i]));
+			treeValues[treeValues.length - 1].push(this.getFinalScore(finalScoreStatus[i], player));
+			treeValues[treeValues.length - 2].push(this.getFinalScore(finalScoreStatus[i], player));
 		}
 		for (var i = treeValues.length - 2; i > 0; i--) {
-			var branches = this.gameTree[i].length / this.gameTree[i - 1].length;
+			var branches = gameTree[i].length / gameTree[i - 1].length;
 			var cont = 0;
 			var score = 0;
-			for (var z = 0; z < this.gameTree[i].length; z++) {
+			for (var z = 0; z < gameTree[i].length; z++) {
 				score += treeValues[i][z];
 				cont++;
 				if (cont == branches) {
@@ -114,12 +198,12 @@ var ticTac = {
 				}
 			}
 		}
-		this.treeValues = treeValues;
+		return treeValues;
 	},
-	getFinalScore: function (gameStatus) {
-		if (gameStatus[0] == 1 && gameStatus[3] == 1) {
+	getFinalScore: function (gameStatus, player) {
+		if (this.checkWinForAPlayer4(player, gameStatus)) {
 			return 10;
-		} else if (gameStatus[0] == 2 && gameStatus[3] == 2) {
+		} else if (this.checkWinForAPlayer4((player == 1 ? 2 : 1), gameStatus)) {
 			return -10;
 		} else {
 			return 0;
@@ -143,14 +227,15 @@ var ticTac = {
 		} else {
 			var gameToPlay = branches[0];
 		}
-		var cpuMove = this.gameTree[gameToPlay.level][gameToPlay.game];
+		var gameTree = (this.startingPlayer == 1 ? this.gameTreeFirstPlayer : this.gameTreeSecondPlayer);
+		var cpuMove = gameTree[gameToPlay.level][gameToPlay.game];
 		var currentGame = this.getCurrentGameStatus();
 		var continueSearch = true;
 		var i = 0;
 		while (continueSearch) {
 			if (cpuMove[i] != currentGame[i]) {
 				continueSearch = false;
-			}else{
+			} else {
 				i++
 			}
 		}
@@ -158,9 +243,10 @@ var ticTac = {
 		this.checkForWinner();
 	},
 	calculatePossibleMoves: function () {
-		var gameCoordinatesForTree = this.searchCurrentGame();
+		var gameCoordinatesForTree = this.searchCurrentGame((this.startingPlayer == 1 ? this.gameTreeFirstPlayer : this.gameTreeSecondPlayer));
 		var level = gameCoordinatesForTree.level;
-		var possibleBranches = this.treeValues[level + 1].length / this.treeValues[level].length;
+		var treeValues = this.startingPlayer == 1 ? this.gameTreeValuesFirstPlayer : this.gameTreeValuesSecondPlayer;
+		var possibleBranches = treeValues[level + 1].length / treeValues[level].length;
 		var gameToStartFrom = gameCoordinatesForTree.game * possibleBranches;
 		var winningMoves = [];
 		var otherMoves = [];
@@ -169,16 +255,20 @@ var ticTac = {
 				level: level + 1,
 				game: gameToStartFrom
 			};
-			if (this.treeValues[level + 1][gameToStartFrom] > 0) {
+			if (treeValues[level + 1][gameToStartFrom] > 0) {
 				winningMoves.push(game);
-			} else if (this.treeValues[level + 1][gameToStartFrom] == 0) {
+			} else if (treeValues[level + 1][gameToStartFrom] == 0) {
 				otherMoves.push(game);
 			}
 			gameToStartFrom++;
 		}
 		if (winningMoves.length > 0) {
+			console.log("mosse vincenti:");
+			console.log(winningMoves);
 			return winningMoves;
 		}
+		console.log("altre mosse:");
+		console.log(otherMoves);
 		return otherMoves;
 	},
 	userMove: function (element) {
@@ -192,19 +282,57 @@ var ticTac = {
 	},
 	checkForWinner: function () {
 		var gameStatus = this.getCurrentGameStatus();
-		if (gameStatus[0] == 1 && gameStatus[3] == 1) {
-			//vince cpu
-			console.log("vince cpu");
-		} else if (gameStatus[0] == 2 && gameStatus[3] == 2) {
-			//vince utente
-			console.log("vince utente");
-		} else if (gameStatus[0] != 0 && gameStatus[1] != 0 && gameStatus[2] != 0 && gameStatus[3] != 0) {
-			//fine - patta
-			console.log("patta");
+		if (this.checkWinForAPlayer4(1, gameStatus)) {
+			console.log("vince giocatore 1");
+		} else if (this.checkWinForAPlayer4(2, gameStatus)) {
+			console.log("vince giocatore 2");
+		} else if (this.checkTieGame4(gameStatus)) {
+			console.log("partita in parità");
 		} else {
 			//prossima mossa
 			this.currentPlayer = (this.currentPlayer == 1 ? 2 : 1);
 			this.playGame();
+		}
+	},
+	checkWinForAPlayer: function (player, gameStatus) {
+		if (
+			(gameStatus[0] == player && gameStatus[1] == player && gameStatus[2] == player) ||
+			(gameStatus[3] == player && gameStatus[4] == player && gameStatus[5] == player) ||
+			(gameStatus[6] == player && gameStatus[7] == player && gameStatus[8] == player) ||
+			(gameStatus[0] == player && gameStatus[3] == player && gameStatus[6] == player) ||
+			(gameStatus[1] == player && gameStatus[4] == player && gameStatus[7] == player) ||
+			(gameStatus[2] == player && gameStatus[5] == player && gameStatus[8] == player) ||
+			(gameStatus[0] == player && gameStatus[4] == player && gameStatus[8] == player) ||
+			(gameStatus[2] == player && gameStatus[4] == player && gameStatus[6] == player)
+		) {
+			return true;
+		} else {
+			return false;
+		}
+	},
+	checkTieGame: function (gameStatus) {
+		if (gameStatus[0] != 0 && gameStatus[1] != 0 && gameStatus[2] != 0 &&
+			gameStatus[3] != 0 && gameStatus[4] != 0 && gameStatus[5] != 0 &&
+			gameStatus[6] != 0 && gameStatus[7] != 0 && gameStatus[8] != 0) {
+			return true;
+		} else {
+			return false;
+		}
+	},
+	checkTieGame4: function (gameStatus) {
+		if (gameStatus[0] != 0 && gameStatus[1] != 0 && gameStatus[2] != 0 && gameStatus[3] != 0 && gameStatus[4] != 0) {
+			// if (gameStatus[0] != 0 && gameStatus[1] != 0 && gameStatus[2] != 0 && gameStatus[3] != 0) {
+			return true;
+		} else {
+			return false;
+		}
+	},
+	checkWinForAPlayer4: function (player, gameStatus) {
+		if (gameStatus[0] == player && gameStatus[3] == player) {
+			// if (gameStatus[3] == player && gameStatus[2] == player) {
+			return true;
+		} else {
+			return false;
 		}
 	},
 	getRandom: function getIntRandomNumber(min, max) {
@@ -214,5 +342,4 @@ var ticTac = {
 
 $(document).ready(function () {
 	ticTac.initializeGame();
-	// console.log(ticTac.gameTree);
 });

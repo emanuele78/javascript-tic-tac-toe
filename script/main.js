@@ -1,3 +1,18 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function createGameTree(tree, level, currentPlayer) {
 	for (var cont = 0; cont < tree[level].length; cont++) {
 		for (var i = 0; i < 9; i++) {
