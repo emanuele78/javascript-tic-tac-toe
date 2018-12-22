@@ -59,27 +59,13 @@ var ticTac = {
 		this.createGameTree(startingLevel, this.startingPlayer, this.gameTreeFirstPlayer);
 		this.createGameTree(startingLevel, (this.startingPlayer == 1 ? 2 : 1), this.gameTreeSecondPlayer);
 		// alberi dei valori per le due mosse iniziali
-		this.gameTreeValuesFirstPlayer = this.createGameTreeValues(this.gameTreeFirstPlayer, 1);
-		this.gameTreeValuesSecondPlayer = this.createGameTreeValues(this.gameTreeSecondPlayer, 2);
-		console.log(this.gameTreeFirstPlayer);
-		console.log(this.gameTreeValuesFirstPlayer);
-		// TODO da cancellare
-		// for (var r = 0; r < this.gameTreeValuesFirstPlayer.length; r++) {
-		// 	var somma = 0;
-		// 	for (var s = 0; s < this.gameTreeValuesFirstPlayer[r].length; s++) {
-		// 		somma += this.gameTreeValuesFirstPlayer[r][s];
-		// 	}
-		// 	console.log("livello " + r + ":" + somma);
-		// }
-		// TODO per la stampa da cancellare
-		// var container= $(".values");
-		// for(var t =0; t<120;t++){
-		// 	var elementCloned = $(".template .element").clone();
-		// 	elementCloned.find(".game").text(this.gameTreeFirstPlayer[5][t]);
-		// 	elementCloned.find(".value").text(this.gameTreeValuesFirstPlayer[5][t]);
-		// 	container.append(elementCloned);
-		// }
-		this.playGame();
+		this.gameTreeValuesFirstPlayer = this.createGameTreeValues2(this.gameTreeFirstPlayer, 1);
+		this.gameTreeValuesSecondPlayer = this.createGameTreeValues2(this.gameTreeSecondPlayer, 2);
+		// console.log(this.gameTreeFirstPlayer);
+		// console.log(this.gameTreeValuesFirstPlayer);
+		// this.playGame();
+		console.log("search");
+		console.log(this.searchCurrentGame(this.gameTreeFirstPlayer));
 	},
 	// metodo che crea albero di gioco per tutte le possibili mosse
 	// in base al giocatore che muove e al livello di partenza
@@ -135,7 +121,8 @@ var ticTac = {
 	searchCurrentGame: function (gameTree) {
 		var continueSearchInsideTree = true;
 		var continueSearchGame = true;
-		var currentGame = this.getCurrentGameStatus();
+		var currentGame = "10210";
+		// var currentGame = this.getCurrentGameStatus();
 		var level = 0;
 		while (continueSearchInsideTree) {
 			var game = 0;
@@ -195,6 +182,55 @@ var ticTac = {
 					treeValues[i - 1].push(score);
 					cont = 0;
 					score = 0;
+				}
+			}
+		}
+		return treeValues;
+	},
+	createGameTreeValues2: function (gameTree, player) {
+		// var treeValues = [
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[],
+		// 	[]
+		// ];
+		var treeValues = [
+			[],
+			[],
+			[],
+			[],
+			[],
+			[]
+		];
+		var finalScoreStatus = gameTree[gameTree.length - 1];
+		for (var level = 0; level < finalScoreStatus.length; level++) {
+			treeValues[treeValues.length - 1].push(this.getFinalScore(finalScoreStatus[level], player));
+			treeValues[treeValues.length - 2].push(this.getFinalScore(finalScoreStatus[level], player));
+		}
+		for (var level = treeValues.length - 2; level > 0; level--) {
+			var branches = gameTree[level].length / gameTree[level - 1].length;
+			var cont = 0;
+			var bestChoice = treeValues[level][0];
+			for (var game = 0; game < gameTree[level].length; game++) {
+				var miao = treeValues[level][game];
+				if (level % 2 == 0) {
+					//massimizzare
+					bestChoice = (treeValues[level][game] > bestChoice ? treeValues[level][game] : bestChoice);
+				} else {
+					//minimizzare
+					bestChoice = (treeValues[level][game] < bestChoice ? treeValues[level][game] : bestChoice);
+				}
+				cont++;
+				if (cont == branches) {
+					treeValues[level - 1].push(bestChoice);
+					cont = 0;
+					bestChoice = treeValues[level][game+1];
 				}
 			}
 		}
