@@ -1,11 +1,16 @@
 "use strict";
 
 $(function () {
-    var scacchiera = new Scacchiera("0000");
+    var scacchiera = new Scacchiera("2000");
     var giocatore = 1;
     // muovi(scacchiera, giocatore);
     var combinazioni = muoviSuLivelloZero(scacchiera, giocatore, 1);
-    console.log(combinazioni);
+    console.log("Combinazione attuale: "+scacchiera.scacchiera.join(""));
+    console.log("Valori albero:");
+    combinazioni.forEach(function (item) {
+       console.log(item.gioco.scacchiera.join("") + " valore combinazione: " + item.valoreMossa);
+       // console.log(item.valoreMossa);
+    });
 });
 
 Number.prototype.avversario = function () {
@@ -53,162 +58,161 @@ function Scacchiera(scacchiera) {
     }
 }
 
-// function muovi(scacchiera, giocatore) {
-//     var combinazioni = [];
-//     for (var cont = 0; cont < scacchiera.caselleLibere(); cont++) {
-//         combinazioni.push(
-//             {mossa: scacchiera.clonaEAssegnaCasellaLibera(giocatore, cont)}
-//         );
-//     }
-//     //stampo combinazioni
-//     combinazioni.forEach(function (item) {
-//         console.log(item.mossa.scacchiera);
-//     });
-//     combinazioni.forEach(function (item) {
-//         if (item.mossa.vinceGiocatore(giocatore)) {
-//             console.log("vince giocatore");
-//             item.valoreMossa = 10;
-//             // return 10;
-//         } else if (item.vinceGiocatore(giocatore.avversario())) {
-//             console.log("vince avversario");
-//             item.valoreMossa = -10;
-//             // return -10;
-//         } else if (item.partitaPatta()) {
-//             console.log("patta");
-//             item.valoreMossa = 0;
-//             // return 0;
-//         } else {
-//             console.log("FINE CHIAMATA ATTUALE");
-//             // item.
-//             return muovi(item.mossa, giocatore.avversario());
-//         }
-//     });
-// }
-
 function muoviSuLivelloZero(scacchiera, giocatore, moltiplicatore) {
     //la mossa è del giocatore
     var combinazioni = [];
     for (var cont = 0; cont < scacchiera.caselleLibere(); cont++) {
         combinazioni.push(
-            {mossa: scacchiera.clonaEAssegnaCasellaLibera(giocatore, cont)}
+            {gioco: scacchiera.clonaEAssegnaCasellaLibera(giocatore, cont)}
         );
     }
-    //stampo combinazioni
-    console.log("Combinazioni livello 0");
     combinazioni.forEach(function (item) {
-        console.log(item.mossa.scacchiera);
-    });
-    combinazioni.forEach(function (item) {
-        if (item.mossa.vinceGiocatore(giocatore)) {
+        if (item.gioco.vinceGiocatore(giocatore)) {
             item.valoreMossa = 10 * moltiplicatore;
-            // return 10;
-        } else if (item.mossa.vinceGiocatore(giocatore.avversario())) {
+        } else if (item.gioco.vinceGiocatore(giocatore.avversario())) {
             item.valoreMossa = -10 * moltiplicatore;
-            // return -10;
-        } else if (item.mossa.partitaPatta()) {
+        } else if (item.gioco.partitaPatta()) {
             item.valoreMossa = 0;
-            // return 0;
         } else {
-            console.log("FINE CHIAMATA LIVELLO 0");
-            item.valoreMossa = muoviSuLivelloUno(item.mossa, giocatore.avversario(), -moltiplicatore);
-            console.log(item.valoreMossa);
+            // item.valoreMossa = muoviSuLivelloUno2(item.gioco, giocatore.avversario(), -moltiplicatore);
+            item.valoreMossa = valutaAlbero(item.gioco, giocatore.avversario(), -moltiplicatore);
         }
     });
     return combinazioni;
 }
 
-function muoviSuLivelloUno(scacchiera, giocatore, moltiplicatore) {
+function valutaAlbero(scacchiera, giocatore, moltiplicatore) {
     //la mossa è del giocatore
     var combinazioni = [];
     for (var cont = 0; cont < scacchiera.caselleLibere(); cont++) {
-        combinazioni.push(
-            scacchiera.clonaEAssegnaCasellaLibera(giocatore, cont)
-        );
+        combinazioni.push({gioco: scacchiera.clonaEAssegnaCasellaLibera(giocatore, cont)});
     }
-    //stampo combinazioni
-    console.log("Combinazioni livello 1");
     combinazioni.forEach(function (item) {
-        console.log(item.scacchiera);
+        if (item.gioco.vinceGiocatore(giocatore)) {
+            item.valoreMossa = 10 * moltiplicatore;
+        } else if (item.gioco.vinceGiocatore(giocatore.avversario())) {
+            item.valoreMossa = -10 * moltiplicatore;
+        } else if (item.gioco.partitaPatta()) {
+            item.valoreMossa = 0;
+        } else {
+            item.valoreMossa = valutaAlbero(item.gioco, giocatore.avversario(), -moltiplicatore);
+        }
     });
+    //valuto la migliore mossa
+    var valore = 0;
     combinazioni.forEach(function (item) {
-        if (item.vinceGiocatore(giocatore)) {
-            return 10 * moltiplicatore;
-        } else if (item.vinceGiocatore(giocatore.avversario())) {
-            return -10 * moltiplicatore;
-        } else if (item.partitaPatta()) {
-            return 0;
+        valore += item.valoreMossa;
+    });
+    return valore;
+}
+
+
+function muoviSuLivelloUno2(scacchiera, giocatore, moltiplicatore) {
+    //la mossa è del giocatore
+    var combinazioni = [];
+    for (var cont = 0; cont < scacchiera.caselleLibere(); cont++) {
+        combinazioni.push({gioco: scacchiera.clonaEAssegnaCasellaLibera(giocatore, cont)});
+    }
+    combinazioni.forEach(function (item) {
+        if (item.gioco.vinceGiocatore(giocatore)) {
+            item.valoreMossa = 10 * moltiplicatore;
+        } else if (item.gioco.vinceGiocatore(giocatore.avversario())) {
+            item.valoreMossa = -10 * moltiplicatore;
+        } else if (item.gioco.partitaPatta()) {
+            item.valoreMossa = 0;
         } else {
             console.log("FINE CHIAMATA LIVELLO 1");
-            var valore = muoviSuLivelloDue(item, giocatore.avversario(), -moltiplicatore);
-            console.log(valore);
-            return valore;
+            item.valoreMossa = muoviSuLivelloDue2(item.gioco, giocatore.avversario(), -moltiplicatore);
         }
     });
+    //valuto la migliore mossa
+    var valore = 0;
+    combinazioni.forEach(function (item) {
+        valore += item.valoreMossa;
+    });
+    return valore;
 }
 
-function muoviSuLivelloDue(scacchiera, giocatore, moltiplicatore) {
+// function muoviSuLivelloDue(scacchiera, giocatore, moltiplicatore) {
+//     //la mossa è del giocatore
+//     var combinazioni = [];
+//     for (var cont = 0; cont < scacchiera.caselleLibere(); cont++) {
+//         combinazioni.push(
+//             scacchiera.clonaEAssegnaCasellaLibera(giocatore, cont)
+//         );
+//     }
+//     // TODO 1021 mol 1
+//     //stampo combinazioni
+//     console.log("Combinazioni livello 2");
+//     combinazioni.forEach(function (item) {
+//         console.log(item.scacchiera);
+//     });
+//     cont = 0;
+//     var value = -1;
+//     while (cont < combinazioni.length && value === -1) {
+//         if (combinazioni[cont].vinceGiocatore(giocatore)) {
+//             value = 10 * moltiplicatore;
+//         } else if (combinazioni[cont].vinceGiocatore(giocatore.avversario())) {
+//             value = -10 * moltiplicatore;
+//         } else if (combinazioni[cont].partitaPatta()) {
+//             value = 0;
+//         } else {
+//             console.log("FINE CHIAMATA LIVELLO 2");
+//             value = muoviSuLivelloTre(combinazioni[cont], giocatore.avversario(), -moltiplicatore);
+//         }
+//         cont++;
+//     }
+//     return value;
+// }
+
+function muoviSuLivelloDue2(scacchiera, giocatore, moltiplicatore) {
     //la mossa è del giocatore
     var combinazioni = [];
     for (var cont = 0; cont < scacchiera.caselleLibere(); cont++) {
-        combinazioni.push(
-            scacchiera.clonaEAssegnaCasellaLibera(giocatore, cont)
-        );
+        combinazioni.push({gioco: scacchiera.clonaEAssegnaCasellaLibera(giocatore, cont)});
     }
-    //stampo combinazioni
-    console.log("Combinazioni livello 2");
     combinazioni.forEach(function (item) {
-        console.log(item.scacchiera);
-    });
-    combinazioni.forEach(function (item) {
-        if (item.vinceGiocatore(giocatore)) {
-            return 10 * moltiplicatore;
-        } else if (item.vinceGiocatore(giocatore.avversario())) {
-            return -10 * moltiplicatore;
-        } else if (item.partitaPatta()) {
-            return 0;
+        if (item.gioco.vinceGiocatore(giocatore)) {
+            item.valoreMossa = 10 * moltiplicatore;
+        } else if (item.gioco.vinceGiocatore(giocatore.avversario())) {
+            item.valoreMossa = -10 * moltiplicatore;
+        } else if (item.gioco.partitaPatta()) {
+            item.valoreMossa = 0;
         } else {
             console.log("FINE CHIAMATA LIVELLO 2");
-            var valore= muoviSuLivelloTre(item, giocatore.avversario(), -moltiplicatore);
-            console.log(valore);
-            return valore;
+            item.valoreMossa = muoviSuLivelloTre2(item.gioco, giocatore.avversario(), -moltiplicatore);
         }
     });
+    //valuto la migliore mossa
+    var valore = 0;
+    combinazioni.forEach(function (item) {
+        valore += item.valoreMossa;
+    });
+    return valore;
 }
 
-function muoviSuLivelloTre(scacchiera, giocatore, moltiplicatore) {
+
+function muoviSuLivelloTre2(scacchiera, giocatore, moltiplicatore) {
     //la mossa è del giocatore
     var combinazioni = [];
     for (var cont = 0; cont < scacchiera.caselleLibere(); cont++) {
-        combinazioni.push(
-            scacchiera.clonaEAssegnaCasellaLibera(giocatore, cont)
-        );
+        combinazioni.push({gioco: scacchiera.clonaEAssegnaCasellaLibera(giocatore, cont)});
     }
-    //stampo combinazioni
-    console.log("Combinazioni livello 3");
     combinazioni.forEach(function (item) {
-        console.log(item.scacchiera);
-    });
-    combinazioni.forEach(function (item) {
-        if (item.vinceGiocatore(giocatore)) {
-            return 10 * moltiplicatore;
-        } else if (item.vinceGiocatore(giocatore.avversario())) {
-            return -10 * moltiplicatore;
-        } else if (item.partitaPatta()) {
-            return 0;
+        if (item.gioco.vinceGiocatore(giocatore)) {
+            item.valoreMossa = 10 * moltiplicatore;
+        } else if (item.gioco.vinceGiocatore(giocatore.avversario())) {
+            item.valoreMossa = -10 * moltiplicatore;
+        } else if (item.gioco.partitaPatta()) {
+            item.valoreMossa = 0;
         } else {
             console.log("FINE CHIAMATA LIVELLO 3 - questo non deve essere stampato");
         }
     });
-    //**********************
-    var nuovaScacchiera = scacchiera.clonaEAssegnaCasellaLibera(giocatore,0);
-    console.log(nuovaScacchiera.scacchiera);
-    if (nuovaScacchiera.vinceGiocatore(giocatore)) {
-        return 10 * moltiplicatore;
-    } else if (nuovaScacchiera.vinceGiocatore(giocatore.avversario())) {
-        return -10 * moltiplicatore;
-    } else if (nuovaScacchiera.partitaPatta()) {
-        return 0;
-    } else {
-        console.log("FINE CHIAMATA LIVELLO 3 - questo non deve essere stampato");
-    }
+    //valuto la migliore mossa
+    var valore = 0;
+    combinazioni.forEach(function (item) {
+        valore += item.valoreMossa;
+    });
+    return valore;
 }
