@@ -1,9 +1,7 @@
 "use strict";
-
 $(function () {
     //listener per pulsante GIOCA
-    $(".game_settings__button").click(function (event) {
-        event.preventDefault();
+    $(".game_settings__button").click(function () {
         preparaGioco();
     });
     //listener per input text
@@ -64,7 +62,10 @@ function preparaGioco() {
 
 // funzione di utilità
 function creaGiocatore(tipo, indice) {
-    return {tipo: tipo, indiceGiocatore: indice};
+    if (indice === 1) {
+        return {tipo: tipo, indiceGiocatore: indice, audio: $("#beep")[0], timeout: 260, countdown: 16};
+    }
+    return {tipo: tipo, indiceGiocatore: indice, audio: $("#boop")[0], timeout: 260, countdown: 16};
 }
 
 //se il giocatore è umano, si collegano listener sulle caselle libere altrimenti si avvia l'algoritmo di ricerca
@@ -75,10 +76,10 @@ function gioca(giocatoreCheMuove, avversario) {
         collegaListener(giocatoreCheMuove, avversario);
     } else {
         setTimeout(function () {
-            var mossaPc = calcola(ottieniStatoScacchiera(), giocatoreCheMuove.indiceGiocatore, giocatoreCheMuove.indiceGiocatore, 0, 1000000000).mossa;
+            var mossaPc = calcola(ottieniStatoScacchiera(), giocatoreCheMuove.indiceGiocatore, giocatoreCheMuove.indiceGiocatore, 0).mossa;
             var indiceCasellaMossaPc = elaboraMossaPc(mossaPc);
             effettuaMossa(giocatoreCheMuove, indiceCasellaMossaPc, avversario);
-        }, 300);
+        }, giocatoreCheMuove.timeout);
     }
 }
 
@@ -106,16 +107,12 @@ function elaboraMossaPc(mossa) {
     return indiceMossaPc;
 }
 
+//posiziona simbolo giocatore sulla scacchiera, riproduce suono, aggiorna stato gioco
 function effettuaMossa(giocatoreCheMuove, indiceCasella, avversario) {
     assegnaPosizione(giocatoreCheMuove, indiceCasella);
-    if (giocatoreCheMuove.indiceGiocatore === 1) {
-        var sound = document.getElementById("beep");
-    } else {
-        var sound = document.getElementById("boop");
-    }
-    sound.play();
+    giocatoreCheMuove.audio.play();
     setTimeout(function () {
-        var statoGioco = calcolaValoreScacchiera(ottieniStatoScacchiera(),giocatoreCheMuove.indiceGiocatore, avversario.indiceGiocatore);
+        var statoGioco = calcolaValoreScacchiera(ottieniStatoScacchiera(), giocatoreCheMuove.indiceGiocatore, avversario.indiceGiocatore);
         switch (statoGioco) {
             case 10:
                 $(".game_status__content").text("vince giocatore " + giocatoreCheMuove.indiceGiocatore + " (" + giocatoreCheMuove.tipo + ")");
@@ -124,13 +121,15 @@ function effettuaMossa(giocatoreCheMuove, indiceCasella, avversario) {
                 $(".game_status__content").text("vince giocatore " + avversario.indiceGiocatore + " (" + avversario.tipo + ")");
                 break;
             case 0:
-                $(".game_status__content").text("partita in parità - nessun vincitore");
+                $(".game_status__content").text("stallo");
+                //easter egg
+                easterEgg(giocatoreCheMuove, avversario);
                 break;
             default:
                 //continua a giocare
                 gioca(avversario, giocatoreCheMuove);
         }
-    },100);
+    }, giocatoreCheMuove.timeout);
 }
 
 // collega listener su caselle vuote e dopo che la mossa del giocatore umano viene effettuata rimuovi il listener
@@ -146,14 +145,11 @@ function ottieniStatoScacchiera() {
     var scacchiera = [];
     for (var cont = 0; cont < 9; cont++) {
         if ($(".game__cell").eq(cont).is(":empty")) {
-            // scacchiera.push(cont);
             scacchiera.push("0");
         } else {
             if ($(".game__cell").eq(cont).has(".game__cell__circle").length) {
-                // scacchiera.push("2");
                 scacchiera.push("2");
             } else {
-                // scacchiera.push("1");
                 scacchiera.push("1");
             }
         }
@@ -170,4 +166,53 @@ function reset() {
 //funzione random
 function getIntRandomNumber(min, max) {
     return Math.trunc(Math.random() * (max + 1 - min) + min);
+}
+
+// easter egg
+function easterEgg(giocatoreCheMuove, avversario) {
+    if (giocatoreCheMuove.tipo === "pc" && avversario.tipo === "pc") {
+        if (giocatoreCheMuove.countdown > 0) {
+            reset();
+            //modifico proprietà giocatore per velocizzare il gioco
+            giocatoreCheMuove.countdown--;
+            avversario.countdown--;
+            giocatoreCheMuove.timeout -= 20;
+            avversario.timeout -= 20;
+            gioca(giocatoreCheMuove, avversario);
+        } else {
+            //fine del countdown
+            mostraFineEasterEgg();
+        }
+    }
+}
+
+function mostraFineEasterEgg() {
+    $(".easteregg").show();
+    var frasi = ["Salve professor Falken.", "Strano gioco.", "l'unica mossa vincente è non giocare.", "che ne dice di una bella partita a scacchi?"];
+    var contenitori = [$(".easteregg__first_line"), $(".easteregg__second_line"), $(".easteregg__third_line"), $(".easteregg__fourth_line")];
+    setTimeout(function () {
+        mostraFrase(frasi, contenitori, 0, 0);
+    }, 2500);
+}
+
+function mostraFrase(frasi, contenitori, indiceLettera, indiceFrase) {
+    if (indiceFrase === frasi.length) {
+        //le frasi da stampare a schermo sono terminate
+        setTimeout(function () {
+            $(".easteregg__love").show();
+        }, 500);
+        return;
+    }
+    if (indiceLettera > frasi[indiceFrase].length) {
+        //la frase corrente è terminata, incremento indice frase
+        setTimeout(function () {
+            mostraFrase(frasi, contenitori, 0, indiceFrase + 1);
+        }, 1600);
+    } else {
+        // stampo lettera frase corrente
+        setTimeout(function () {
+            contenitori[indiceFrase].text(frasi[indiceFrase].substring(0, indiceLettera));
+            mostraFrase(frasi, contenitori, indiceLettera + 1, indiceFrase);
+        }, 50);
+    }
 }

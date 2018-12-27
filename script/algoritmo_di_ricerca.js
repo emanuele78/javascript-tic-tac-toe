@@ -64,7 +64,7 @@ function calcolaValoreScacchiera(scacchiera, giocatore, avversario) {
 }
 
 //algoritmo ricorsivo
-function calcola(scacchiera, giocatoreCheMuove, giocatoreCorrente, livelloRicorsione, moltiplicatore) {
+function calcola(scacchiera, giocatoreCheMuove, giocatoreCorrente, livelloRicorsione) {
     //controllo se la combinazione corrente può determinare una vittoria o una patta
     var valoreMossa = calcolaValoreScacchiera(scacchiera, giocatoreCheMuove, giocatoreCheMuove.avversario());
     if (valoreMossa !== undefined) {
@@ -78,28 +78,65 @@ function calcola(scacchiera, giocatoreCheMuove, giocatoreCorrente, livelloRicors
         mossePossibili.push({mossa: assegnaCasella(giocatoreCorrente, cont, scacchiera)});
     }
     for (cont = 0; cont < mossePossibili.length; cont++) {
-        var valoreScacchieraDallaRicorsione = calcola(mossePossibili[cont].mossa, giocatoreCheMuove, giocatoreCorrente.avversario(), livelloRicorsione + 1, moltiplicatore / 10);
-        mossePossibili[cont].valoreMossa = valoreScacchieraDallaRicorsione.valoreMossa * moltiplicatore;
+        var valoreScacchieraDallaRicorsione = calcola(mossePossibili[cont].mossa, giocatoreCheMuove, giocatoreCorrente.avversario(), livelloRicorsione + 1);
+        mossePossibili[cont].valoreMossa = valoreScacchieraDallaRicorsione.valoreMossa;
     }
     //calcolo la migliore combinazione e il relativo valore da ritornare
     //per il giocatore che muove sarà il valore più alto mentre per l'avversario il valore più basso
-    for (cont = 0; cont < mossePossibili.length; cont++) {
-        if (cont === 0) {
-            var valore = mossePossibili[0].valoreMossa;
-            var miglioreScelta = mossePossibili[0].mossa;
-        } else {
-            if (giocatoreCorrente === giocatoreCheMuove) {
-                if (mossePossibili[cont].valoreMossa > valore) {
-                    valore = mossePossibili[cont].valoreMossa;
-                    miglioreScelta = mossePossibili[cont].mossa;
-                }
+    if (livelloRicorsione > 0) {
+        for (cont = 0; cont < mossePossibili.length; cont++) {
+            if (cont === 0) {
+                var valore = mossePossibili[0].valoreMossa;
+                var miglioreScelta = mossePossibili[0].mossa;
             } else {
-                if (mossePossibili[cont].valoreMossa < valore) {
-                    valore = mossePossibili[cont].valoreMossa;
-                    miglioreScelta = mossePossibili[cont].mossa;
+                if (giocatoreCorrente === giocatoreCheMuove) {
+                    if (mossePossibili[cont].valoreMossa > valore) {
+                        valore = mossePossibili[cont].valoreMossa;
+                        miglioreScelta = mossePossibili[cont].mossa;
+                    }
+                } else {
+                    if (mossePossibili[cont].valoreMossa < valore) {
+                        valore = mossePossibili[cont].valoreMossa;
+                        miglioreScelta = mossePossibili[cont].mossa;
+                    }
                 }
             }
         }
+        return {valoreMossa: valore, mossa: miglioreScelta};
     }
-    return {valoreMossa: valore, mossa: miglioreScelta};
+    //a questo punto il livello di ricorsione è 0 quindi il giocatore corrente è il giocatore che muove il pertanto il valore da scegliere è il più alto
+    //se ci sono più combinazioni di pari valore ne viene scelta una random
+    return scegliMiglioreCombinazioneRandom(mossePossibili);
+}
+
+//funzione che viene chiamata con livello di ricorsione = 0
+//sceglie randomicamente il migliore valore tra più combinazioni di pari valore
+function scegliMiglioreCombinazioneRandom(mossePossibili) {
+    //se c'è una sola combinazione la ritorno immediatamente
+    if (mossePossibili.length === 1) {
+        return mossePossibili[0];
+    }
+    //ordinamneto decrescente delle combinazioni per il loro valore
+    mossePossibili.sort(function (a, b) {
+        if (a.valoreMossa > b.valoreMossa) {
+            return -1;
+        } else if (a.valoreMossa < b.valoreMossa) {
+            return 1;
+        }
+        return 0;
+    });
+    //array che conterrà le mosse di pari valore tra loro
+    var combinazioniMigliori = [];
+    for (var cont = 0; cont < mossePossibili.length; cont++) {
+        if (cont === 0) {
+            //il primo elemento ha sicuramente il valore più alto
+            combinazioniMigliori.push(mossePossibili[0]);
+        } else {
+            if (mossePossibili[cont].valoreMossa === combinazioniMigliori[0].valoreMossa) {
+                combinazioniMigliori.push(mossePossibili[cont]);
+            }
+        }
+    }
+    //scelgo randomicamente mossa migliore da ritornare
+    return combinazioniMigliori[getIntRandomNumber(0, combinazioniMigliori.length - 1)];
 }

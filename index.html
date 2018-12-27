@@ -10,7 +10,7 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 		<script src="script/algoritmo_di_ricerca.js"></script>
 		<script src="script/controller.js"></script>
-		<title></title>
+		<title>WarGames - Tic Tac Toe</title>
 	</head>
 	<body>
 		<audio id="beep">
@@ -21,8 +21,8 @@
 		</audio>
 		<div class="game_settings">
 			<span class="game_settings__label">>>> Numero di giocatori</span>
-			<input class="game_settings__input" type="text" maxlength="1" autofocus>
-			<a class="game_settings__button" href="">GIOCA</a>
+			<input autofocus class="game_settings__input" maxlength="1" type="text">
+			<span class="game_settings__button" href="">GIOCA</span>
 		</div>
 		<div class="game">
 			<div class="game__cell game__cell--right_border game__cell--lower_border"></div>
@@ -38,6 +38,17 @@
 		<div class="game_status">
 			<span class="game_status__label">>>> Stato del gioco:</span>
 			<span class="game_status__content"></span>
+		</div>
+		<div class="easteregg">
+			<div class="easteregg__first_line"></div>
+			<div class="easteregg__second_line"></div>
+			<div class="easteregg__third_line"></div>
+			<div class="easteregg__fourth_line"></div>
+			<div class="easteregg__love">Made with
+				<span class="easteregg__love--red">
+					<i class="fas fa-heart"></i>
+				</span> by a WarGames fan.
+			</div>
 		</div>
 		<div class="template">
 			<i class="game__cell__circle far fa-circle"></i>

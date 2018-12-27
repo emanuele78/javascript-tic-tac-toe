@@ -65,6 +65,7 @@ body {
 .game_settings__input {
 	width: 20px;
 	font-size: 16px;
+	font-weight: bold;
 	margin-left: 10px;
 	padding: 2px 6px;
 	text-align: center;
@@ -72,7 +73,6 @@ body {
 	color: #2f313a;
 	border: none;
 	outline: none;
-	font-weight: bold;
 	background-color: #bdc0ca;
 }
 
@@ -106,7 +106,36 @@ body {
 	border-bottom: 10px solid #bdc0ca;
 }
 
+.easteregg {
+	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	padding: 50px;
+	background-color: #2f313a;
+}
 
+.easteregg__first_line, .easteregg__second_line, .easteregg__third_line, .easteregg__fourth_line {
+	font-size: 28px;
+	text-transform: uppercase;
+	color: #bdc0ca;
+}
+
+.easteregg__love {
+	display: none;
+	position: absolute;
+	bottom: 30px;
+	left: 50px;
+	font-size: 18px;
+	color: #bdc0ca;
+}
+
+.easteregg__love--red{
+	font-size: 14px;
+	color: red;
+}
 
 
 
