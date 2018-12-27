@@ -5,35 +5,43 @@
 		<meta content="width=device-width, initial-scale=1.0" name="viewport">
 		<!-- bootstrap here -->
 		<link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" rel="stylesheet">
-		<!-- custom classes here -->
+		<link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
 		<link href="css/style.css" rel="stylesheet">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		<!--<script src="script/four.js"></script>-->
-		<!--<script src="script/test.js"></script>-->
-		<script src="script/test2.js"></script>
+		<script src="script/test3.js"></script>
+		<script src="script/controller.js"></script>
 		<title></title>
 	</head>
 	<body>
-		<div class="game_container">
-			<div class="game_cell"></div>
-			<div class="game_cell"></div>
-			<div class="game_cell"></div>
-			<div class="game_cell"></div>
-			<div class="game_cell"></div>
-			<div class="game_cell"></div>
-			<div class="game_cell"></div>
-			<div class="game_cell"></div>
-			<div class="game_cell"></div>
+		<audio id="beep">
+			<source src="assets/beep.mp3" type="audio/mpeg">
+		</audio>
+		<audio id="boop">
+			<source src="assets/boop.mp3" type="audio/mpeg">
+		</audio>
+		<div class="game_settings">
+			<span class="game_settings__label">>>> Numero di giocatori</span>
+			<input class="game_settings__input" type="text" maxlength="1" value="1">
+			<a class="game_settings__button" href="">GIOCA</a>
 		</div>
-		<!--<div class="values">
+		<div class="game">
+			<div class="game__cell game__cell--right_border game__cell--lower_border"></div>
+			<div class="game__cell game__cell--right_border game__cell--left_border game__cell--lower_border"></div>
+			<div class="game__cell game__cell--left_border game__cell--lower_border"></div>
+			<div class="game__cell game__cell--right_border game__cell--upper_border game__cell--lower_border"></div>
+			<div class="game__cell game__cell--right_border game__cell--left_border game__cell--upper_border game__cell--lower_border"></div>
+			<div class="game__cell game__cell--left_border game__cell--upper_border game__cell--lower_border"></div>
+			<div class="game__cell game__cell--right_border game__cell--upper_border"></div>
+			<div class="game__cell game__cell--right_border game__cell--left_border game__cell--upper_border"></div>
+			<div class="game__cell game__cell--left_border game__cell--upper_border"></div>
+		</div>
+		<div class="game_status">
+			<span class="game_status__label">>>> Stato del gioco:</span>
+			<span class="game_status__content"></span>
 		</div>
 		<div class="template">
-			<div class="element">
-				<span class="game"></span><span> : </span><span class="value"></span>
-			</div>
-		</div>-->
+			<i class="game__cell__circle far fa-circle"></i>
+			<i class="game__cell__cross fas fa-times"></i>
+		</div>
 	</body>
 </html>
-
-<!--<i class="far fa-circle"></i>-->
-<!--<i class="fas fa-times"></i>-->
