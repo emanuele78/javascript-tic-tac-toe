@@ -1,16 +1,18 @@
 "use strict";
 
 $(function () {
+    //listener per pulsante GIOCA
     $(".game_settings__button").click(function (event) {
         event.preventDefault();
-        avviaGioco();
+        preparaGioco();
     });
+    //listener per input text
     $(".game_settings__input").keyup(function (event) {
         var key = event.keyCode;
         switch (key) {
             case 13:
                 //invio
-                avviaGioco();
+                preparaGioco();
                 break;
             case 8:
                 //cancella - ammesso
@@ -31,7 +33,8 @@ $(function () {
     });
 });
 
-function avviaGioco() {
+// funzione che prepare il gioco, resettando la scacchiera e creando i giocatori
+function preparaGioco() {
     reset();
     var giocatori = $(".game_settings__input").val();
     if (giocatori !== "0" && giocatori !== "1" && giocatori !== "2") {
@@ -51,6 +54,7 @@ function avviaGioco() {
             giocatoreUno = creaGiocatore("pc", 1);
             giocatoreDue = creaGiocatore("pc", 2);
     }
+    // il giocatore che inizia è deciso randomicamente
     if (getIntRandomNumber(1, 100) % 2 === 0) {
         gioca(giocatoreDue, giocatoreUno);
     } else {
@@ -58,19 +62,12 @@ function avviaGioco() {
     }
 }
 
+// funzione di utilità
 function creaGiocatore(tipo, indice) {
     return {tipo: tipo, indiceGiocatore: indice};
 }
 
-function assegnaPosizione(giocatoreCheMuove, indiceCasella) {
-    if (giocatoreCheMuove.indiceGiocatore === 1) {
-        var clonedElement = $(".template .game__cell__cross").clone();
-    } else {
-        clonedElement = $(".template .game__cell__circle").clone();
-    }
-    $(".game__cell").eq(indiceCasella).html(clonedElement);
-}
-
+//se il giocatore è umano, si collegano listener sulle caselle libere altrimenti si avvia l'algoritmo di ricerca
 function gioca(giocatoreCheMuove, avversario) {
     $(".game_status__content").text("in attesa di giocatore " + giocatoreCheMuove.indiceGiocatore + " (" + giocatoreCheMuove.tipo + ")");
     if (giocatoreCheMuove.tipo === "persona") {
@@ -85,6 +82,17 @@ function gioca(giocatoreCheMuove, avversario) {
     }
 }
 
+// assegno una data posizione libera a un giocatore
+function assegnaPosizione(giocatoreCheMuove, indiceCasella) {
+    if (giocatoreCheMuove.indiceGiocatore === 1) {
+        var clonedElement = $(".template .game__cell__cross").clone();
+    } else {
+        clonedElement = $(".template .game__cell__circle").clone();
+    }
+    $(".game__cell").eq(indiceCasella).html(clonedElement);
+}
+
+// l'algoritmo di ricerca ritorna la mogliore combinazione possibile, estrapolo da essa la casella in cui muovere
 function elaboraMossaPc(mossa) {
     var scacchieraAttuale = ottieniStatoScacchiera();
     var indiceMossaPc = -1;
@@ -107,7 +115,7 @@ function effettuaMossa(giocatoreCheMuove, indiceCasella, avversario) {
     }
     sound.play();
     setTimeout(function () {
-        var statoGioco = controllaScacchiera(giocatoreCheMuove, avversario);
+        var statoGioco = calcolaValoreScacchiera(ottieniStatoScacchiera(),giocatoreCheMuove.indiceGiocatore, avversario.indiceGiocatore);
         switch (statoGioco) {
             case 10:
                 $(".game_status__content").text("vince giocatore " + giocatoreCheMuove.indiceGiocatore + " (" + giocatoreCheMuove.tipo + ")");
@@ -125,20 +133,7 @@ function effettuaMossa(giocatoreCheMuove, indiceCasella, avversario) {
     },100);
 }
 
-function controllaScacchiera(giocatoreCheMuove, avversario) {
-    var statoCorrenteScacchiera = ottieniStatoScacchiera();
-    var valoreGioco = calcolaValoreScacchiera2(statoCorrenteScacchiera, giocatoreCheMuove.indiceGiocatore, avversario.indiceGiocatore);
-    if (valoreGioco === 10) {
-        return 10;
-    } else if (valoreGioco === -10) {
-        return -10;
-    } else if (valoreGioco === 0) {
-        return 0;
-    } else {
-        return undefined;
-    }
-}
-
+// collega listener su caselle vuote e dopo che la mossa del giocatore umano viene effettuata rimuovi il listener
 function collegaListener(giocatoreCheMuove, avversario) {
     $(".game__cell:empty").click(function () {
         $(".game__cell").off();
@@ -146,6 +141,7 @@ function collegaListener(giocatoreCheMuove, avversario) {
     });
 }
 
+//ritorna una array dallo stato corrente della scacchiera con 0 casella libera e 1/2 i giocatori
 function ottieniStatoScacchiera() {
     var scacchiera = [];
     for (var cont = 0; cont < 9; cont++) {
@@ -162,10 +158,10 @@ function ottieniStatoScacchiera() {
             }
         }
     }
-    console.log(scacchiera);
     return scacchiera;
 }
 
+//resetta il gioco rimuovendo pedine e cancellando i listener
 function reset() {
     $(".game__cell").off();
     $(".game__cell").empty();

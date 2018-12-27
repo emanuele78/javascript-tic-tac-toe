@@ -12,7 +12,7 @@ body {
 	justify-content: space-between;
 	width: 100vw;
 	height: 100vh;
-	background-color: black;
+	background-color: #2f313a;
 }
 
 .game {
@@ -47,7 +47,7 @@ body {
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	color: white;
+	color: #bdc0ca;
 }
 
 .template {
@@ -59,7 +59,7 @@ body {
 	font-size: 20px;
 	padding: 20px 0;
 	cursor: default;
-	color: white;
+	color: #bdc0ca;
 }
 
 .game_settings__input {
@@ -69,7 +69,11 @@ body {
 	padding: 2px 6px;
 	text-align: center;
 	vertical-align: middle;
+	color: #2f313a;
 	border: none;
+	outline: none;
+	font-weight: bold;
+	background-color: #bdc0ca;
 }
 
 .game_settings__button {
@@ -78,7 +82,7 @@ body {
 	padding: 5px;
 	vertical-align: middle;
 	text-decoration: none;
-	color: white;
+	color: #bdc0ca;
 }
 
 .game_status__label, .game_settings__label, .game_status__content {
@@ -87,19 +91,19 @@ body {
 }
 
 .game__cell--right_border {
-	border-right: 10px solid white;
+	border-right: 10px solid #bdc0ca;
 }
 
 .game__cell--left_border {
-	border-left: 10px solid white;
+	border-left: 10px solid #bdc0ca;
 }
 
 .game__cell--upper_border {
-	border-top: 10px solid white;
+	border-top: 10px solid #bdc0ca;
 }
 
 .game__cell--lower_border {
-	border-bottom: 10px solid white;
+	border-bottom: 10px solid #bdc0ca;
 }
 
 
