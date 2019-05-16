@@ -1,5 +1,5 @@
 # TIC TAC TOE (TRIS)
-Gioco del tris in Javascript, con 1 o 2 giocatori. Per tutti i nostalgici del film [Wargames](https://www.youtube.com/watch?v=Wcw8fY1dn_E)
+Gioco del tris in Javascript, con 1 o 2 giocatori. Per tutti i nostalgici del film [WarGames](https://www.youtube.com/watch?v=Wcw8fY1dn_E)
 
 [![Generic badge](https://img.shields.io/badge/LIVEDEMO-HERE-<COLOR>.svg)](https://emanuelemazzante.dev/demo/tic-tac-toe/)
 
